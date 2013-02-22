@@ -24,6 +24,8 @@
         <script type="text/javascript">
             var dojoConfig = {
                 async: true,
+                // cacheBust:new Date(), 
+                // waitSeconds:5,
                 packages: [{
                     name: "viewer",
                     location: location.pathname.replace(/[^\/]+$/, '') + "js/viewer"
@@ -36,9 +38,19 @@
         <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.3">
         </script>
         <script type="text/javascript">
-            require(["viewer/Controller"], function(Controller){
-                Controller.startup();
-            });
+            var agol = true;
+            if(agol){
+                require(["viewer/agolController"], function(agolController){
+                    agolController.startup();
+                });
+            }
+            else{
+                require(["viewer/Controller"], function(Controller){
+                    Controller.startup();
+                });
+            }
+            
+            
         </script>
     </body>
 </html>

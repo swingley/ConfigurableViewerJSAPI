@@ -1,5 +1,7 @@
+
 define([
     'esri/map',
+    'esri/arcgis/utils',
     'esri/dijit/Popup',
     'esri/dijit/Geocoder',
     'esri/dijit/Attribution',
@@ -22,14 +24,17 @@ define([
     'gis/dijit/Draw',
     "dojo/text!./templates/leftContent.html",
     "dojo/text!./templates/mapOverlay.html",
-    "viewer/config",
+    "viewer/agol_config",
     'dojo/domReady!'
-    ], function(Map, Popup, Geocoder, Attribution, FeatureLayer, Legend, dom, domConstruct, on, parser, array, BorderContainer, ContentPane, TitlePane, win, lang, Deferred, Print, Growler, GeoLocation, Draw, leftContent, mapOverlay, config) {
+    ], function(Map,esriUtils, Popup, Geocoder, Attribution, FeatureLayer, Legend, dom, domConstruct, on, parser, array, BorderContainer, ContentPane, TitlePane, win, lang, Deferred, Print, Growler, GeoLocation, Draw, leftContent, mapOverlay, config) {
+    
     return {
+
         config: config,
         startup: function() {
             this.initConfig();
             this.initView();
+            
         },
         initConfig: function() {
             esriConfig.defaults.io.proxyUrl = config.proxy.url;
@@ -58,32 +63,32 @@ define([
             this.initMap();
         },
         initMap: function() {
+            var that = this;
+
             var popup = new esri.dijit.Popup(null, domConstruct.create("div"));
 
-            this.map = new esri.Map("map", {
-                basemap: config.basemap,
-                extent: new esri.geometry.Extent(config.initialExtent),
-                infoWindow: popup
-            });
-            console.log(this.map);
-            this.map.on('load', lang.hitch(this, 'initWidgets'));
-
-            array.forEach(config.operationalLayers, function(layer) {
-                if(layer.type == 'dynamic') {
-                    l = new esri.layers.ArcGISDynamicMapServiceLayer(layer.url, layer.options);
-                    this.map.addLayer(l);
-                } else if(layer.type == 'tiled') {
-                    l = new esri.layers.ArcGISTiledMapServiceLayer(layer.url, layer.options);
-                    this.map.addLayer(l);
-                } else if(layer.type == 'feature') {
-                    l = new esri.layers.FeatureLayer(layer.url, layer.options);
-                    this.map.addLayer(l);
-                } else {
-                    console.log('Layer type not supported: ', layer.type);
+            var mapDeferred = esriUtils.createMap("085648dddb0e41baa898b5e0b3afc902", "map", {
+                mapOptions: {
+                    /*add options*/
                 }
-            }, this);
+            });
+            mapDeferred.then(function(response) {
+                clickHandler = response.clickEventHandle;
+                clickListener = response.clickEventListener;
+                map = response.map;                
+
+            }).then(function(){
+                that.map = map;
+                console.log(that.map);
+                var func = lang.hitch(that,that.initWidgets);
+                func();
+            });         
+           
         },
+        
         initWidgets: function(evt) {
+            
+            console.log("in initWidgets");
             this.growler = new Growler({}, "growlerDijit");
             this.growler.startup();
 
@@ -113,7 +118,8 @@ define([
             this.drawWidget.startup();
 
             this.legend = new esri.dijit.Legend({
-                map: this.map
+                map: this.map,
+                layerInfos:layerInfo
             }, "legendDijit");
             this.legend.startup();
         }

@@ -40,7 +40,8 @@ define([
             this.map.addLayer(this.graphics);
             dojo.connect(this.drawToolbar, "onDrawEnd", this, 'onDrawToolbarDrawEnd');
         },
-        drawPoint: function() {
+        drawPoint: function() {    
+            this.disablePopUps();        
             //this.disconnectMapClick();
             this.drawToolbar.activate(esri.toolbars.Draw.POINT);
         },
@@ -56,14 +57,27 @@ define([
             dojo.disconnect(this.mapClickEventHandle);
             this.mapClickEventHandle = null;
         },
+        enablePopups: function() {
+            if (clickListener) {
+                clickHandler = dojo.connect(map, "onClick", clickListener);
+            }
+        },
+        disablePopUps: function(){
+            console.log(clickHandler, clickListener)
+            if (clickHandler) {
+                dojo.disconnect(clickHandler);
+            }
+
+        },
         connectMapClick: function() {
-            if(this.mapClickEventHandle === null) {
+            if(!this.mapClickEventHandle) {
                 this.mapClickEventHandle = dojo.connect(this.map, "onClick", this.mapClickEventListener);
             }
         },
         onDrawToolbarDrawEnd: function(geometry) {
             this.drawToolbar.deactivate();
             //this.connectMapClick();
+            this.enablePopups();
             var symbol;
             switch(geometry.type) {
             case "point":

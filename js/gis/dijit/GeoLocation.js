@@ -29,6 +29,10 @@ define([
         widgetsInTemplate: true,
         baseClass: 'gis_GeoLocation_Dijit',
         buttonClass: 'geoLocationButton',
+        constructor: function(params){
+           console.log("creating widget with params " + params);
+           
+        },
         postCreate: function() {
             this.inherited(arguments);
             this.symbol = new esri.symbol.PictureMarkerSymbol(require.toUrl("gis/dijit/GeoLocation/images/bluedot.png"), 38, 38);
@@ -36,7 +40,7 @@ define([
                 id: 'GeoLocationGraphics',
                 title: "GPS Location"
             });
-            this.map.addLayer(this.graphics);
+            map.addLayer(this.graphics);
         },
         geoLocate: function() {
             if(navigator && navigator.geolocation) {
