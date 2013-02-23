@@ -30,8 +30,7 @@ define([
         baseClass: 'gis_GeoLocation_Dijit',
         buttonClass: 'geoLocationButton',
         constructor: function(params){
-           console.log("creating widget with params " + params);
-           
+           console.log("creating widget with params ", params);
         },
         postCreate: function() {
             this.inherited(arguments);
@@ -40,7 +39,7 @@ define([
                 id: 'GeoLocationGraphics',
                 title: "GPS Location"
             });
-            map.addLayer(this.graphics);
+            this.map.addLayer(this.graphics);
         },
         geoLocate: function() {
             if(navigator && navigator.geolocation) {

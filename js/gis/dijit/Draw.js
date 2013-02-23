@@ -1,5 +1,6 @@
 define([
     "dojo/_base/declare",
+    "dojo/_base/connect",
     "dijit/_WidgetBase",
     "dijit/_TemplatedMixin",
     "dijit/_WidgetsInTemplateMixin",
@@ -8,7 +9,7 @@ define([
     "dojo/_base/Color",
     "esri/toolbars/draw",
     "dojo/text!./Draw/templates/Draw.html"
-    ], function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Button, lang, Color, draw, drawTemplate) {
+    ], function(declare, connect, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Button, lang, Color, draw, drawTemplate) {
 
     //anonymous function to load CSS files required for this module
     (function() {
@@ -38,45 +39,34 @@ define([
                 title:"Draw Graphics"
             });
             this.map.addLayer(this.graphics);
-            dojo.connect(this.drawToolbar, "onDrawEnd", this, 'onDrawToolbarDrawEnd');
+            connect.connect(this.drawToolbar, "onDrawEnd", this, 'onDrawToolbarDrawEnd');
         },
         drawPoint: function() {    
             this.disablePopUps();        
-            //this.disconnectMapClick();
             this.drawToolbar.activate(esri.toolbars.Draw.POINT);
         },
         drawLine: function() {
-            //this.disconnectMapClick();
+            this.disablePopUps();        
             this.drawToolbar.activate(esri.toolbars.Draw.POLYLINE);
         },
         drawPolygon: function() {
-            //this.disconnectMapClick();
+            this.disablePopUps();        
             this.drawToolbar.activate(esri.toolbars.Draw.POLYGON);
         },
-        disconnectMapClick: function() {
-            dojo.disconnect(this.mapClickEventHandle);
-            this.mapClickEventHandle = null;
-        },
+        //
+        // clickHandler and clickListener were both passed to this widget 
+        // as constructor arguments
+        // since this is a widget, constructor arguments are mixed in
+        // automatically so there's not need to do:
+        // this.clickHandler = argumetns.clickHandler in the constructor
         enablePopups: function() {
-            if (clickListener) {
-                clickHandler = dojo.connect(map, "onClick", clickListener);
-            }
+            this.clickHandler = this.map.on("click", this.clickListener);
         },
         disablePopUps: function(){
-            console.log(clickHandler, clickListener)
-            if (clickHandler) {
-                dojo.disconnect(clickHandler);
-            }
-
-        },
-        connectMapClick: function() {
-            if(!this.mapClickEventHandle) {
-                this.mapClickEventHandle = dojo.connect(this.map, "onClick", this.mapClickEventListener);
-            }
+            this.clickHandler.remove();
         },
         onDrawToolbarDrawEnd: function(geometry) {
             this.drawToolbar.deactivate();
-            //this.connectMapClick();
             this.enablePopups();
             var symbol;
             switch(geometry.type) {
@@ -97,7 +87,6 @@ define([
         clearGraphics: function() {
             this.graphics.clear();
             this.drawToolbar.deactivate();
-            //this.connectMapClick();
         }
     });
 });

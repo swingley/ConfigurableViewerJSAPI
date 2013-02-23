@@ -72,23 +72,18 @@ define([
                     /*add options*/
                 }
             });
-            mapDeferred.then(function(response) {
-                clickHandler = response.clickEventHandle;
-                clickListener = response.clickEventListener;
-                map = response.map;                
-
-            }).then(function(){
-                that.map = map;
-                console.log(that.map);
-                var func = lang.hitch(that,that.initWidgets);
-                func();
-            });         
+            mapDeferred.then(lang.hitch(this, function(response) {
+                this.clickHandler = response.clickEventHandle;
+                this.clickListener = response.clickEventListener;
+                this.map = response.map;                
+                this.initWidgets();
+            }));
            
         },
         
+        // evt doesn't appear to be used
         initWidgets: function(evt) {
             
-            console.log("in initWidgets");
             this.growler = new Growler({}, "growlerDijit");
             this.growler.startup();
 
@@ -113,13 +108,18 @@ define([
             this.printWidget.startup();
 
             this.drawWidget = new Draw({
-                map: this.map
+                map: this.map,
+                clickHandler: this.clickHandler,
+                clickListener: this.clickListener
             }, 'drawDijit');
             this.drawWidget.startup();
 
             this.legend = new esri.dijit.Legend({
-                map: this.map,
-                layerInfos:layerInfo
+                map: this.map
+                // where is layerInfo defined? 
+                // commented out so that the legend picks up whatever 
+                // is in the map
+                // layerInfos:layerInfo
             }, "legendDijit");
             this.legend.startup();
         }
